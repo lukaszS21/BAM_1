@@ -1,14 +1,20 @@
 package com.example.lab1
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+
 class UserActivity : AppCompatActivity() {
+    private lateinit var serviceIntent: Intent
+    private lateinit var numberReceiver: NumberReceiver
 
     private lateinit var textViewUsername: TextView
-
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
@@ -19,10 +25,33 @@ class UserActivity : AppCompatActivity() {
         // Zadanie 1: Pobranie przekazanej nazwy użytkownika z intencji
         val intent = intent
         val username = intent.getStringExtra("username")
-
+        serviceIntent = Intent(this, CountingService::class.java).apply {
+            putExtra("name", extras?.getString("name"))
+        }
+        numberReceiver = createReceiver()
         // Zadanie 1: Wyświetlenie nazwy użytkownika w elemencie TextView
         if (username != null) {
             textViewUsername.text = "Witaj, $username!"
         }
+    }
+
+    fun startService(view: View) {
+        startService(serviceIntent)
+    }
+
+    fun stopService(view: View) {
+        stopService(serviceIntent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(numberReceiver)
+    }
+
+    private fun createReceiver(): NumberReceiver {
+        val filter = IntentFilter("COUNTER_DATA")
+        val receiver = NumberReceiver()
+        registerReceiver(receiver, filter)
+        return receiver
     }
 }
