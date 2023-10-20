@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -29,9 +30,18 @@ class UserActivity : AppCompatActivity() {
             putExtra("name", extras?.getString("name"))
         }
         numberReceiver = createReceiver()
+
         // Zadanie 1: Wyświetlenie nazwy użytkownika w elemencie TextView
         if (username != null) {
             textViewUsername.text = "Witaj, $username!"
+            // Send a broadcast with the username
+            // Log the username directly in UserActivity
+            Log.d("UserActivity", "Received username: $username")
+
+            // Send a broadcast with the username
+            val broadcastIntent = Intent("COUNTER_DATA")
+            broadcastIntent.putExtra("username", username)
+            sendBroadcast(broadcastIntent)
         }
     }
 
