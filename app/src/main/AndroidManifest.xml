@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
+    <permission
+        android:name="com.example.lab1.permission.READ_USER_DATA"
+        android:protectionLevel="dangerous" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,6 +31,11 @@
             android:name=".CountingService"
             android:enabled="true"
             android:exported="true"></service>
+        <provider
+            android:name=".database.UserContentProvider"
+            android:authorities="com.example.lab1.provider"
+            android:exported="true"
+            android:readPermission="com.example.lab1.permission.READ_USER_DATA"/>
 
 
     </application>

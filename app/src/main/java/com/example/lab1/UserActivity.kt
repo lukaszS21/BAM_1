@@ -17,15 +17,14 @@ class UserActivity : AppCompatActivity() {
     private lateinit var numberReceiver: NumberReceiver
 
     private lateinit var textViewUsername: TextView
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        // Zadanie 1: Inicjalizacja pola TextView do wyświetlania nazwy użytkownika
         textViewUsername = findViewById(R.id.textViewUsername)
 
-        // Zadanie 1: Pobranie przekazanej nazwy użytkownika z intencji
         val intent = intent
         val username = intent.getStringExtra("username")
         serviceIntent = Intent(this, CountingService::class.java).apply {
@@ -33,30 +32,43 @@ class UserActivity : AppCompatActivity() {
         }
         numberReceiver = createReceiver()
 
-        // Zadanie 1: Wyświetlenie nazwy użytkownika w elemencie TextView
         if (username != null) {
             textViewUsername.text = "Witaj, $username!"
-            // Send a broadcast with the username
-            // Log the username directly in UserActivity
             Log.d("UserActivity", "Received username: $username")
 
-            // Send a broadcast with the username
             val broadcastIntent = Intent("COUNTER_DATA")
             broadcastIntent.putExtra("username", username)
             sendBroadcast(broadcastIntent)
+
+            // Save the user to the database
+            saveUser(username)
         }
     }
+
     @SuppressLint("CheckResult")
     fun fetchData(view: View) {
         AppDatabase.getInstance(this)?.userDao()?.getAllUsers()
-            ?.subscribeOn(Schedulers.io())  // Run on a background thread
-            ?.observeOn(AndroidSchedulers.mainThread())  // Observe on the main thread
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe { users ->
                 Log.d("UserActivity", "Total Users: ${users.size}")
                 for (user in users) {
                     Log.d("UserActivity", "User: ${user.username}, Number: ${user.stopperValue}")
                 }
             }
+    }
+
+    @SuppressLint("CheckResult")
+    fun saveUser(username: String) {
+        val user = User(username, 0)
+        AppDatabase.getInstance(this)?.userDao()?.insert(user)
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe({
+                Log.d("UserActivity", "User saved successfully.")
+            }, {
+                Log.e("UserActivity", "Error saving user.", it)
+            })
     }
 
     fun startService(view: View) {
