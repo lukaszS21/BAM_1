@@ -8,7 +8,9 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-
+import com.example.lab1.database.AppDatabase
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class UserActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
@@ -43,6 +45,18 @@ class UserActivity : AppCompatActivity() {
             broadcastIntent.putExtra("username", username)
             sendBroadcast(broadcastIntent)
         }
+    }
+    @SuppressLint("CheckResult")
+    fun fetchData(view: View) {
+        AppDatabase.getInstance(this)?.userDao()?.getAllUsers()
+            ?.subscribeOn(Schedulers.io())  // Run on a background thread
+            ?.observeOn(AndroidSchedulers.mainThread())  // Observe on the main thread
+            ?.subscribe { users ->
+                Log.d("UserActivity", "Total Users: ${users.size}")
+                for (user in users) {
+                    Log.d("UserActivity", "User: ${user.username}, Number: ${user.stopperValue}")
+                }
+            }
     }
 
     fun startService(view: View) {

@@ -1,24 +1,38 @@
 package com.example.lab1
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
+import com.example.lab1.database.AppDatabase
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class NumberReceiver : BroadcastReceiver() {
+    @SuppressLint("CheckResult")
     override fun onReceive(context: Context?, intent: Intent?) {
-        val extras = intent?.extras
-        val name = extras?.getString("name")
-        val number = extras?.getInt("number")
+        intent?.extras?.run {
+            val name = getString("name")
+            val number = getInt("number")
 
-        name?.let {
-            Log.d("Number Receiver", "Received name: $it")
+            name?.let { Log.d("Number Receiver", "Odebrano nazwę: $it") }
+            number?.let { Log.d("Number Receiver", "Odebrano numer: $it") }
+
+            if (name != null && number != null) {
+                val user = User(username = name, stopperValue = number)
+                Completable.fromAction {
+                    AppDatabase.getInstance(context!!)?.userDao()?.insert(user)
+                }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        Log.d("Number Receiver", "Pomyślnie dodano użytkownika do bazy danych")
+                    }, { error ->
+                        Log.e("Number Receiver", "Błąd podczas dodawania użytkownika do bazy danych: ", error)
+                    })
+            }
         }
-
-        number?.let {
-            Log.d("Number Receiver", "Received number: $it")
-        }
-
     }
 }
