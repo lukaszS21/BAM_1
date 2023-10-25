@@ -15,7 +15,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class UserActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
     private lateinit var numberReceiver: NumberReceiver
-
     private lateinit var textViewUsername: TextView
 
     @SuppressLint("MissingInflatedId")
@@ -23,10 +22,13 @@ class UserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
+        // Inicjalizacja widoku z nazwą użytkownika
         textViewUsername = findViewById(R.id.textViewUsername)
 
         val intent = intent
         val username = intent.getStringExtra("username")
+
+        // Utworzenie intencji dla usługi CountingService
         serviceIntent = Intent(this, CountingService::class.java).apply {
             putExtra("name", extras?.getString("name"))
         }
@@ -36,17 +38,19 @@ class UserActivity : AppCompatActivity() {
             textViewUsername.text = "Witaj, $username!"
             Log.d("UserActivity", "Received username: $username")
 
+            // Wysłanie informacji o nazwie użytkownika do odbiorcy
             val broadcastIntent = Intent("COUNTER_DATA")
             broadcastIntent.putExtra("username", username)
             sendBroadcast(broadcastIntent)
 
-            // Save the user to the database
+            // Zapisanie użytkownika w bazie danych
             saveUser(username)
         }
     }
 
     @SuppressLint("CheckResult")
     fun fetchData(view: View) {
+        // Pobranie danych użytkowników z bazy danych
         AppDatabase.getInstance(this)?.userDao()?.getAllUsers()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
@@ -60,6 +64,7 @@ class UserActivity : AppCompatActivity() {
 
     @SuppressLint("CheckResult")
     fun saveUser(username: String) {
+        // Zapisanie nowego użytkownika w bazie danych
         val user = User(username, 0)
         AppDatabase.getInstance(this)?.userDao()?.insert(user)
             ?.subscribeOn(Schedulers.io())
@@ -72,19 +77,23 @@ class UserActivity : AppCompatActivity() {
     }
 
     fun startService(view: View) {
+        // Rozpoczęcie usługi CountingService
         startService(serviceIntent)
     }
 
     fun stopService(view: View) {
+        // Zatrzymanie usługi CountingService
         stopService(serviceIntent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        // Wyrejestrowanie odbiorcy przy zakończeniu działania aktywności
         unregisterReceiver(numberReceiver)
     }
 
     private fun createReceiver(): NumberReceiver {
+        // Utworzenie i rejestracja odbiorcy dla danych licznika
         val filter = IntentFilter("COUNTER_DATA")
         val receiver = NumberReceiver()
         registerReceiver(receiver, filter)

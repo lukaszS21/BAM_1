@@ -10,9 +10,10 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
+// Usługa odpowiedzialna za liczenie i wysyłanie wyników poprzez nadawanie
 class CountingService : Service() {
     private val unsubscribe = PublishSubject.create<Any>()
-    private var lastValue: Long = 0  // Dodaj zmienną, aby przechowywać ostatnią wartość
+    private var lastValue: Long = 0  // Zmienna przechowująca ostatnią wartość
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
@@ -21,19 +22,21 @@ class CountingService : Service() {
             broadcastName.putExtra("name", it.getStringExtra("name"))
             sendBroadcast(broadcastName)
 
+            // Observable emitujący wartości co sekundę
             val observable = Observable.interval(0, 1, TimeUnit.SECONDS)
 
             val observer = object : Observer<Long> {
                 override fun onSubscribe(d: Disposable) {
-                    Log.d("onSubscribe", "Usługa uruchomiona")
+                    Log.d("onSubscribe", "Rozpoczęto usługę")
                 }
 
                 override fun onNext(value: Long) {
-                    Log.d("CountingService", value.toString())
+                // Log.d("CountingService", value.toString())
 
-                    // Aktualizuj lastValue za każdym razem, gdy dostaniesz nową wartość
+                    // Aktualizacja lastValue nową wartością
                     lastValue = value
 
+                    // Wysyłanie wyniku liczenia poprzez nadawanie
                     val broadcast = Intent()
                     broadcast.action = "COUNTER_DATA"
                     broadcast.putExtra("name", it.getStringExtra("name"))
@@ -44,16 +47,16 @@ class CountingService : Service() {
                 override fun onError(e: Throwable) {}
 
                 override fun onComplete() {
+                    // Wysyłanie ostatniej wartości po zakończeniu liczenia
                     val broadcast = Intent()
                     broadcast.action = "COUNTER_DATA"
-                    broadcast.putExtra("name", it.getStringExtra("name"))
-
-                    // Wykorzystaj ostatnią znaną wartość lastValue w onComplete
-                    broadcast.putExtra("number", lastValue.toInt())
+//                    broadcast.putExtra("name", it.getStringExtra("name"))
+//                    broadcast.putExtra("number", lastValue.toInt())
                     sendBroadcast(broadcast)
                 }
             }
 
+            // Subskrypcja z observable do observera z możliwością zatrzymania
             observable.takeUntil(unsubscribe).subscribe(observer)
         }
 
@@ -64,9 +67,8 @@ class CountingService : Service() {
         return null
     }
 
+    // Przy zniszczeniu usługi, zatrzymuje obserwowanie
     override fun onDestroy() {
         unsubscribe.onNext(0)
     }
 }
-
-

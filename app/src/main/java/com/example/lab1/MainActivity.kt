@@ -24,25 +24,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Zadanie 1: Inicjalizacja pól widoku
+        // Inicjalizuje komponenty interfejsu użytkownika
         editTextUsername = findViewById(R.id.editTextUsername)
         buttonNext = findViewById(R.id.buttonNext)
 
-        // Prośba o uprawnienia
+        // Wysyła prośbę o przyznanie uprawnień
         requestPermission()
 
-        // Zadanie 1: Ustawienie słuchacza kliknięcia na przycisku "buttonNext"
+        // Ustawia reakcję na kliknięcie przycisku "buttonNext"
         buttonNext.setOnClickListener(View.OnClickListener {
-            // Zadanie 1: Pobranie wprowadzonej nazwy użytkownika z pola tekstowego
+            // Pobiera wprowadzoną nazwę użytkownika
             val username = editTextUsername.text.toString()
 
-            // Zadanie 1: Tworzenie i konfiguracja intencji, aby przejść do UserActivity
+            // Tworzy intencję przeniesienia do UserActivity
             val intent = Intent(this@MainActivity, UserActivity::class.java)
 
-            // Zadanie 1: Przekazanie nazwy użytkownika jako dodatkowej informacji w intencji
+            // Dołącza nazwę użytkownika do intencji
             intent.putExtra("username", username)
 
-            // Zadanie 1: Rozpoczęcie aktywności UserActivity
+            // Uruchamia UserActivity
             startActivity(intent)
         })
     }
@@ -58,9 +58,9 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Uprawnienie zostało przyznane
+                // Obsługuje sytuację, gdy uprawnienie zostało przyznane
             } else {
-                // Uprawnienie zostało odrzucone
+                // Obsługuje sytuację, gdy uprawnienie zostało odrzucone
             }
         }
     }

@@ -7,11 +7,14 @@ import androidx.room.Query
 import com.example.lab1.User
 import io.reactivex.rxjava3.core.Completable
 
+// Definicja interfejsu DAO dla encji User, umożliwiająca dostęp do bazy danych
 @Dao
 interface UserDao {
+    // Dodawanie użytkownika do bazy danych
     @Insert
     fun insert(user: User): Completable
 
-    @Query("SELECT * FROM user") // Adjusted to match the table name in the User entity.
+    // Pobieranie wszystkich użytkowników z bazy danych
+    @Query("SELECT * FROM user")
     fun getAllUsers(): Observable<List<User>>
 }
